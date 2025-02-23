@@ -65,10 +65,8 @@ export const authService = {
       if (!currentUser) throw new Error('No user logged in');
 
       const updatedUser = await api.put<User>(`/holidaze/profiles/${currentUser.name}`, {
-        bio: data.bio,
-        avatar: data.avatar,
-        banner: data.banner,
-        venueManager: data.venueManager
+        ...data,
+        avatar: data.avatar ? { url: data.avatar, alt: 'Profile avatar' } : undefined
       });
 
       const newUser = { ...currentUser, ...updatedUser };
@@ -77,6 +75,12 @@ export const authService = {
     } catch (error: any) {
       throw new Error(error.message || 'Failed to update profile');
     }
+  },
+
+  async updateAvatar(avatarUrl: string): Promise<User> {
+    return this.updateProfile({
+      avatar: avatarUrl
+    });
   },
 
   async getProfile(name: string, options?: { bookings?: boolean; venues?: boolean }): Promise<User> {
