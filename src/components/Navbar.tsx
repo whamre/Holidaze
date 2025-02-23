@@ -318,11 +318,36 @@ const Navbar = () => {
                   maxWidth: '100%',
                   mt: 1.5,
                   '& .MuiMenuItem-root': {
-                    py: 2
+                    py: 2,
+                    px: 3
                   }
                 }
               }}
             >
+              {user && (
+                <Box sx={{ px: 3, py: 2 }}>
+                  <Stack direction="row" spacing={2} alignItems="center">
+                    <Avatar 
+                      src={user.avatar?.url} 
+                      alt={user.name}
+                      sx={{ 
+                        width: 40, 
+                        height: 40,
+                        bgcolor: 'primary.main'
+                      }}
+                    >
+                      {user.name.charAt(0).toUpperCase()}
+                    </Avatar>
+                    <Box>
+                      <Typography variant="subtitle1">{user.name}</Typography>
+                      <Typography variant="body2" color="text.secondary">
+                        {user.email}
+                      </Typography>
+                    </Box>
+                  </Stack>
+                </Box>
+              )}
+              <Divider />
               {navItems.map((item) => (
                 <MenuItem
                   key={item.path}

@@ -131,6 +131,21 @@ const VenueDetails = () => {
     setCurrentImageIndex((prev) => (prev - 1 + mediaImages.length) % mediaImages.length);
   };
 
+  const getAmenityLabel = (amenity: string): string => {
+    switch (amenity) {
+      case 'wifi':
+        return 'WiFi';
+      case 'parking':
+        return 'Parking';
+      case 'breakfast':
+        return 'Meals';
+      case 'pets':
+        return 'Pets';
+      default:
+        return amenity;
+    }
+  };
+
   if (loading) {
     return (
       <Container maxWidth="lg" sx={{ py: 4 }}>
@@ -173,7 +188,6 @@ const VenueDetails = () => {
       <Container maxWidth="lg">
         <Grid container spacing={4}>
           <Grid item xs={12} md={8}>
-            {/* Main Image Gallery */}
             <Paper 
               elevation={0} 
               sx={{ 
@@ -262,51 +276,32 @@ const VenueDetails = () => {
               </Box>
             </Paper>
 
-            {/* Thumbnail Grid */}
-            {mediaImages.length > 1 && (
-              <Grid container spacing={1} sx={{ mt: 1 }}>
-                {mediaImages.map((image, index) => (
-                  <Grid item xs={2} key={index}>
-                    <Paper
-                      elevation={0}
-                      sx={{
-                        position: 'relative',
-                        paddingTop: '100%',
-                        cursor: 'pointer',
-                        opacity: currentImageIndex === index ? 1 : 0.6,
-                        transition: 'opacity 0.2s',
-                        '&:hover': {
-                          opacity: 1
-                        }
-                      }}
-                      onClick={() => setCurrentImageIndex(index)}
-                    >
-                      <Box
-                        component="img"
-                        src={image.url}
-                        alt={`${venue.name} - ${index + 1}`}
-                        sx={{
-                          position: 'absolute',
-                          top: 0,
-                          left: 0,
-                          width: '100%',
-                          height: '100%',
-                          objectFit: 'cover',
-                          borderRadius: 1
-                        }}
-                      />
-                    </Paper>
-                  </Grid>
-                ))}
-              </Grid>
-            )}
-
             <Box sx={{ mt: 4 }}>
-              <Stack direction="row" alignItems="center" justifyContent="space-between" sx={{ mb: 2 }}>
-                <Typography variant="h4" component="h1" sx={{ fontWeight: 'bold' }}>
+              <Stack 
+                direction={{ xs: 'column', sm: 'row' }} 
+                alignItems={{ xs: 'flex-start', sm: 'center' }} 
+                justifyContent="space-between" 
+                sx={{ mb: 2 }}
+              >
+                <Typography 
+                  variant="h4" 
+                  component="h1" 
+                  sx={{ 
+                    fontWeight: 'bold',
+                    wordBreak: 'break-word',
+                    overflowWrap: 'break-word',
+                    maxWidth: '100%'
+                  }}
+                >
                   {venue.name}
                 </Typography>
-                <Rating value={venue.rating} precision={0.5} readOnly size="large" />
+                <Rating 
+                  value={venue.rating} 
+                  precision={0.5} 
+                  readOnly 
+                  size="large"
+                  sx={{ mt: { xs: 1, sm: 0 } }}
+                />
               </Stack>
               
               <Stack direction="row" spacing={1} alignItems="center" sx={{ mb: 3 }}>
@@ -316,28 +311,29 @@ const VenueDetails = () => {
                 </Typography>
               </Stack>
 
-              <Stack direction="row" spacing={1} sx={{ mb: 4 }}>
-                {venue.meta.wifi && (
-                  <Tooltip title="WiFi Available">
-                    <Chip icon={<WifiIcon />} label="WiFi" />
-                  </Tooltip>
+              <Box sx={{ 
+                display: 'flex', 
+                flexWrap: 'wrap', 
+                gap: 1,
+                mb: 4
+              }}>
+                {Object.entries(venue.meta).map(([key, value]) => 
+                  value && (
+                    <Tooltip key={key} title={`${getAmenityLabel(key)} Available`}>
+                      <Chip 
+                        icon={
+                          key === 'wifi' ? <WifiIcon /> :
+                          key === 'parking' ? <LocalParkingIcon /> :
+                          key === 'breakfast' ? <RestaurantIcon /> :
+                          <PetsIcon />
+                        }
+                        label={getAmenityLabel(key)}
+                        size="small"
+                      />
+                    </Tooltip>
+                  )
                 )}
-                {venue.meta.parking && (
-                  <Tooltip title="Parking Available">
-                    <Chip icon={<LocalParkingIcon />} label="Parking" />
-                  </Tooltip>
-                )}
-                {venue.meta.breakfast && (
-                  <Tooltip title="Breakfast Included">
-                    <Chip icon={<RestaurantIcon />} label="Breakfast" />
-                  </Tooltip>
-                )}
-                {venue.meta.pets && (
-                  <Tooltip title="Pet Friendly">
-                    <Chip icon={<PetsIcon />} label="Pet Friendly" />
-                  </Tooltip>
-                )}
-              </Stack>
+              </Box>
 
               <Typography variant="body1" paragraph sx={{ color: 'text.secondary', lineHeight: 1.8 }}>
                 {venue.description}
@@ -486,7 +482,6 @@ const VenueDetails = () => {
           </Grid>
         </Grid>
 
-        {/* Image Gallery Dialog */}
         <Dialog 
           open={openImageDialog} 
           onClose={() => setOpenImageDialog(false)}
