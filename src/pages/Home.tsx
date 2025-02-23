@@ -4,20 +4,32 @@ import {
   Box, 
   Container, 
   Typography, 
+  Button, 
   Grid, 
   Card,
   CardContent,
   CardMedia,
   Rating,
+  Chip,
   Stack,
   TextField,
   InputAdornment,
   useTheme,
   alpha,
+  Paper,
+  Divider,
   Autocomplete
 } from '@mui/material';
 import SearchIcon from '@mui/icons-material/Search';
 import LocationOnIcon from '@mui/icons-material/LocationOn';
+import WifiIcon from '@mui/icons-material/Wifi';
+import LocalParkingIcon from '@mui/icons-material/LocalParking';
+import RestaurantIcon from '@mui/icons-material/Restaurant';
+import PetsIcon from '@mui/icons-material/Pets';
+import BeachAccessIcon from '@mui/icons-material/BeachAccess';
+import CabinIcon from '@mui/icons-material/Cabin';
+import ApartmentIcon from '@mui/icons-material/Apartment';
+import VillaIcon from '@mui/icons-material/Villa';
 import { venueService } from '../services/venue.service';
 import { Venue } from '../types/api.types';
 
@@ -28,10 +40,34 @@ interface Location {
   count: number;
 }
 
+const categories = [
+  { 
+    name: 'Beach Houses', 
+    icon: <BeachAccessIcon />, 
+    image: 'https://images.unsplash.com/photo-1499793983690-e29da59ef1c2?auto=format&fit=crop&w=800&h=500&q=80' 
+  },
+  { 
+    name: 'Cabins', 
+    icon: <CabinIcon />, 
+    image: 'https://images.unsplash.com/photo-1449158743715-0a90ebb6d2d8?auto=format&fit=crop&w=800&h=500&q=80' 
+  },
+  { 
+    name: 'Apartments', 
+    icon: <ApartmentIcon />, 
+    image: 'https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?auto=format&fit=crop&w=800&h=500&q=80' 
+  },
+  { 
+    name: 'Villas', 
+    icon: <VillaIcon />, 
+    image: 'https://images.unsplash.com/photo-1577495508326-19a1b3cf65b7?auto=format&fit=crop&w=800&h=500&q=80' 
+  }
+];
+
 const Home = () => {
   const theme = useTheme();
   const navigate = useNavigate();
   const [featuredVenues, setFeaturedVenues] = useState<Venue[]>([]);
+  const [trendingVenues, setTrendingVenues] = useState<Venue[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState<Location | null>(null);
   const [locations, setLocations] = useState<Location[]>([]);
@@ -46,6 +82,12 @@ const Home = () => {
           .sort((a, b) => b.rating - a.rating)
           .slice(0, 3);
         setFeaturedVenues(featured);
+
+        // Get trending venues (most recent)
+        const trending = [...venues]
+          .sort((a, b) => new Date(b.created).getTime() - new Date(a.created).getTime())
+          .slice(0, 6);
+        setTrendingVenues(trending);
 
         // Extract unique locations
         const cities = new Map<string, number>();
@@ -101,7 +143,6 @@ const Home = () => {
     navigate(`/venues?search=${location.type}:${location.label}`);
   };
 
-  // Rest of the component remains the same...
   return (
     <Box>
       {/* Hero Section */}
@@ -203,8 +244,9 @@ const Home = () => {
               >
                 From cozy cabins to luxury villas, find the perfect venue for your next adventure
               </Typography>
-
-              <Box
+              
+              <Paper
+                elevation={0}
                 sx={{
                   p: { xs: 2, md: 3 },
                   borderRadius: 3,
@@ -268,7 +310,7 @@ const Home = () => {
                   )}
                   isOptionEqualToValue={(option, value) => option.id === value.id}
                 />
-              </Box>
+              </Paper>
             </Grid>
             
             {/* 3D Cards Section */}
@@ -348,6 +390,253 @@ const Home = () => {
               </Grid>
             </Grid>
           </Grid>
+        </Container>
+      </Box>
+
+      {/* Categories Section */}
+      <Container maxWidth="lg" sx={{ py: { xs: 6, md: 10 } }}>
+        <Typography 
+          variant="h3" 
+          align="center" 
+          sx={{ 
+            mb: { xs: 4, md: 6 },
+            fontWeight: 700,
+            fontSize: { xs: '2rem', md: '2.5rem' }
+          }}
+        >
+          Explore by Category
+        </Typography>
+        <Grid container spacing={{ xs: 2, md: 3 }}>
+          {categories.map((category, index) => (
+            <Grid item xs={6} sm={6} md={3} key={index}>
+              <Card
+                sx={{
+                  height: '100%',
+                  cursor: 'pointer',
+                  position: 'relative',
+                  overflow: 'hidden',
+                  '&:hover': {
+                    '& .MuiCardMedia-root': {
+                      transform: 'scale(1.1)'
+                    }
+                  }
+                }}
+                onClick={() => navigate('/venues')}
+              >
+                <Box sx={{ paddingTop: '62.5%', position: 'relative' }}>
+                  <CardMedia
+                    component="img"
+                    image={category.image}
+                    alt={category.name}
+                    sx={{
+                      position: 'absolute',
+                      top: 0,
+                      left: 0,
+                      width: '100%',
+                      height: '100%',
+                      objectFit: 'cover',
+                      transition: 'transform 0.3s ease-in-out'
+                    }}
+                  />
+                </Box>
+                <Box
+                  sx={{
+                    position: 'absolute',
+                    bottom: 0,
+                    left: 0,
+                    right: 0,
+                    bgcolor: 'rgba(0, 0, 0, 0.6)',
+                    color: 'white',
+                    p: { xs: 1, sm: 2 },
+                    backdropFilter: 'blur(4px)'
+                  }}
+                >
+                  <Stack direction="row" spacing={1} alignItems="center">
+                    {category.icon}
+                    <Typography 
+                      variant="h6"
+                      sx={{
+                        fontSize: { xs: '0.9rem', sm: '1.25rem' }
+                      }}
+                    >
+                      {category.name}
+                    </Typography>
+                  </Stack>
+                </Box>
+              </Card>
+            </Grid>
+          ))}
+        </Grid>
+      </Container>
+
+      {/* Trending Venues Section */}
+      <Box sx={{ bgcolor: 'background.default', py: { xs: 6, md: 10 } }}>
+        <Container maxWidth="lg">
+          <Typography 
+            variant="h3" 
+            sx={{ 
+              mb: { xs: 4, md: 6 },
+              fontWeight: 700,
+              fontSize: { xs: '2rem', md: '2.5rem' }
+            }}
+          >
+            Trending Now
+          </Typography>
+          
+          <Grid container spacing={{ xs: 2, md: 3 }}>
+            {trendingVenues.map((venue) => (
+              <Grid item xs={12} sm={6} md={4} key={venue.id}>
+                <Card
+                  onClick={() => navigate(`/venues/${venue.id}`)}
+                  sx={{
+                    height: '100%',
+                    cursor: 'pointer',
+                    transition: 'all 0.2s',
+                    '&:hover': {
+                      transform: 'translateY(-8px)',
+                      boxShadow: theme.shadows[8]
+                    }
+                  }}
+                >
+                  <Box sx={{ paddingTop: '66.67%', position: 'relative' }}>
+                    <CardMedia
+                      component="img"
+                      image={venue.media?.[0]?.url || 'https://images.unsplash.com/photo-1564013799919-ab600027ffc6?auto=format&fit=crop&w=800&h=533&q=80'}
+                      alt={venue.name}
+                      sx={{
+                        position: 'absolute',
+                        top: 0,
+                        left: 0,
+                        width: '100%',
+                        height: '100%',
+                        objectFit: 'cover'
+                      }}
+                    />
+                  </Box>
+                  <CardContent>
+                    <Typography 
+                      variant="h5" 
+                      gutterBottom 
+                      sx={{ 
+                        fontWeight: 600,
+                        fontSize: { xs: '1.25rem', sm: '1.5rem' }
+                      }}
+                    >
+                      {venue.name}
+                    </Typography>
+                    
+                    <Stack direction="row" spacing={1} sx={{ mb: 2 }}>
+                      <LocationOnIcon sx={{ color: 'text.secondary' }} />
+                      <Typography color="text.secondary">
+                        {venue.location.city}, {venue.location.country}
+                      </Typography>
+                    </Stack>
+
+                    <Stack 
+                      direction="row" 
+                      spacing={1} 
+                      sx={{ 
+                        mb: 2,
+                        flexWrap: 'wrap',
+                        gap: 1 
+                      }}
+                    >
+                      {venue.meta.wifi && <WifiIcon color="action" />}
+                      {venue.meta.parking && <LocalParkingIcon color="action" />}
+                      {venue.meta.breakfast && <RestaurantIcon color="action" />}
+                      {venue.meta.pets && <PetsIcon color="action" />}
+                    </Stack>
+
+                    <Divider sx={{ my: 2 }} />
+
+                    <Stack
+                      direction={{ xs: 'column', sm: 'row' }}
+                      justifyContent="space-between"
+                      alignItems={{ xs: 'flex-start', sm: 'center' }}
+                      spacing={1}
+                    >
+                      <Typography variant="h6" color="primary" sx={{ fontWeight: 700 }}>
+                        €{venue.price}
+                        <Typography component="span" variant="body2" color="text.secondary">
+                          /night
+                        </Typography>
+                      </Typography>
+                      <Stack direction="row" spacing={1} alignItems="center">
+                        <Rating value={venue.rating} size="small" readOnly />
+                        <Typography variant="body2" color="text.secondary">
+                          ({venue.rating})
+                        </Typography>
+                      </Stack>
+                    </Stack>
+                  </CardContent>
+                </Card>
+              </Grid>
+            ))}
+          </Grid>
+        </Container>
+      </Box>
+
+      {/* CTA Section */}
+      <Box
+        sx={{
+          position: 'relative',
+          py: { xs: 10, md: 15 },
+          textAlign: 'center',
+          color: 'white',
+          overflow: 'hidden',
+          '&::before': {
+            content: '""',
+            position: 'absolute',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            backgroundImage: 'url(https://images.unsplash.com/photo-1571896349842-33c89424de2d?auto=format&fit=crop&w=1920&q=80)',
+            backgroundSize: 'cover',
+            backgroundPosition: 'center',
+            filter: 'brightness(0.3)',
+            zIndex: 0
+          }
+        }}
+      >
+        <Container maxWidth="md" sx={{ position: 'relative', zIndex: 1 }}>
+          <Typography 
+            variant="h2" 
+            sx={{ 
+              mb: { xs: 2, md: 3 },
+              fontWeight: 800,
+              fontSize: { xs: '2rem', sm: '2.5rem', md: '3rem' }
+            }}
+          >
+            Start Hosting Your Venue
+          </Typography>
+          <Typography 
+            variant="h5" 
+            sx={{ 
+              mb: { xs: 3, md: 4 },
+              opacity: 0.9,
+              fontSize: { xs: '1.1rem', sm: '1.25rem' }
+            }}
+          >
+            Turn your property into a successful business
+          </Typography>
+          <Button
+            variant="contained"
+            size="large"
+            onClick={() => navigate('/register')}
+            sx={{
+              py: { xs: 1.5, md: 2 },
+              px: { xs: 4, md: 6 },
+              fontSize: { xs: '1rem', md: '1.2rem' },
+              bgcolor: 'white',
+              color: 'primary.main',
+              '&:hover': {
+                bgcolor: 'grey.100'
+              }
+            }}
+          >
+            Become a Host
+          </Button>
         </Container>
       </Box>
     </Box>
